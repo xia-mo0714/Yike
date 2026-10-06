@@ -1,0 +1,255 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Mail;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Speech.Recognition;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Script.Serialization;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
+using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Markup;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Windows.Shell;
+using System.Windows.Threading;
+using Microsoft.Win32;
+namespace WindowsTranslator {
+public partial class App {
+[STAThread]
+public static void Main (string[] args)
+{
+	ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+	if(args.Contains("--speech-worker-test")){
+		try{PhaseTwoSpeechQa.Run(args[Array.IndexOf(args,"--mode")+1],args[Array.IndexOf(args,"--output")+1]);}catch(Exception ex){File.WriteAllText(args[Array.IndexOf(args,"--output")+1]+".error",ex.GetType().Name+": "+ex.Message);Environment.ExitCode=1;}return;
+	}
+	if(args.Contains("--vad-smoke-test")){
+		try{Tests.SpeechVadSmoke(args[Array.IndexOf(args,"--audio")+1],args[Array.IndexOf(args,"--output")+1]);}catch(Exception){Environment.ExitCode=1;}return;
+	}
+	if (args.Contains ("--speech-quality-test")) {
+		try { SpeechQualityTests.Run (args[Array.IndexOf(args,"--cases")+1], args[Array.IndexOf(args,"--output")+1], args[Array.IndexOf(args,"--pipeline")+1],args.Contains("--confidence-retry")); }
+		catch (Exception ex) { File.WriteAllText(args[Array.IndexOf(args,"--output")+1]+".error", ex.GetType().Name+": "+ex.Message+Environment.NewLine+ex.StackTrace); Environment.ExitCode = 1; }
+		return;
+	}
+	if (args.Contains ("--update-service-test")) {
+		UpdateTests.Live (args.Contains ("--download-update-test"));
+		return;
+	}
+	if (args.Contains ("--self-test")) {
+		Tests.Run ();
+		return;
+	}
+	if (args.Contains ("--whisper-input-test")) {
+		Tests.WhisperInputIntegration ();
+		return;
+	}
+	if (!args.Contains ("--render-preview")) {
+		bool createdNew;
+		singleton = new Mutex (true, "Local\\Yike.Desktop", out createdNew);
+		activation = new EventWaitHandle (false, EventResetMode.AutoReset, "Local\\Yike.Activate");
+		if (!createdNew) {
+			activation.Set ();
+			return;
+		}
+	}
+	System.Windows.Application application = new System.Windows.Application ();
+	application.ShutdownMode = ShutdownMode.OnMainWindowClose;
+	application.DispatcherUnhandledException += delegate(object s, DispatcherUnhandledExceptionEventArgs e) {
+		System.Windows.MessageBox.Show (e.Exception.Message, "Yike");
+		e.Handled = true;
+	};
+	new App ().Start (application, args);
+	application.Run ();
+}
+
+
+private void Button (string name, Action action)
+{
+	Find<System.Windows.Controls.Button> (name).Click += delegate {
+		action ();
+	};
+}
+
+
+private void Status (string text)
+{
+	status.Text = text;
+}
+
+
+private void Start (System.Windows.Application app, string[] args)
+{
+	previewMode = args.Contains ("--render-preview");
+	speechWorker=previewMode?null:new SpeechWorkerManager(new SpeechRuntimePaths(AppDomain.CurrentDomain.BaseDirectory));
+	voiceInput=new SpeechInput(speechWorker);
+	prefs = Store.Read ("preferences.json", new Preferences ());
+	CommonMeanings.SetEnabled (prefs.OnlineDictionary);
+	history = Store.Read ("history.json", new List<Entry> ());
+	using (FileStream stream = File.OpenRead (System.IO.Path.Combine (AppDomain.CurrentDomain.BaseDirectory, "MainWindow.xaml"))) {
+		window = (Window)XamlReader.Load ((Stream)stream);
+	}
+	app.Resources = window.Resources;
+	app.MainWindow = window;
+	input = Find<System.Windows.Controls.TextBox> ("SourceText");
+	output = Find<System.Windows.Controls.TextBox> ("ResultText");
+	status = Find<TextBlock> ("Status");
+	source = Find<System.Windows.Controls.ComboBox> ("SourceLanguage");
+	target = Find<System.Windows.Controls.ComboBox> ("TargetLanguage");
+	if (activation != null) {
+		ThreadPool.RegisterWaitForSingleObject (activation, delegate {
+			window.Dispatcher.BeginInvoke (new Action (Show));
+		}, null, -1, false);
+	}
+	defaultAppIcon = new BitmapImage (new Uri (System.IO.Path.Combine (AppDomain.CurrentDomain.BaseDirectory, "app.png")));
+	Find<System.Windows.Controls.Image> ("AppIcon").Source = defaultAppIcon;
+	window.Icon = defaultAppIcon;
+	ApplyAccountIdentity ();
+	for (int num = 0; num < codes.Length; num++) {
+		source.Items.Add (new ComboBoxItem {
+			Content = names [num],
+			Tag = codes [num]
+		});
+		if (num > 0) {
+			target.Items.Add (new ComboBoxItem {
+				Content = names [num],
+				Tag = codes [num]
+			});
+		}
+	}
+	Select (source, prefs.Source);
+	Select (target, prefs.Target);
+	BindTextInput ();
+	BindMainWindowActions ();
+	window.SourceInitialized += delegate {
+		IntPtr handle = new WindowInteropHelper (window).Handle;
+		HwndSource.FromHwnd (handle).AddHook (Hook);
+		selectionHotkeyRegistered = !previewMode && Native.RegisterHotKey (handle, 1, 16390u, 70u);
+		if (!previewMode && !selectionHotkeyRegistered) {
+			SelectionError ("Ctrl+Shift+F 注册失败，可能已被其他程序占用。请关闭冲突程序后重启 Yike。");
+		}
+		ApplyAppearance ();
+	};
+	window.Closing += delegate(object s, CancelEventArgs e) {
+		if (!exiting) {
+			ResetVoiceShortcut (true);
+			e.Cancel = true;
+			window.Hide ();
+		}
+	};
+	window.Closed += delegate {
+		if (updateCheckCancel != null) updateCheckCancel.Cancel ();
+		Cancel ();
+		CloseActiveSelection ();
+		speech.Dispose ();
+		voiceInput.Dispose ();
+		if(speechWorker!=null){if(speechWorkerStatusChanged!=null)speechWorker.StatusChanged-=speechWorkerStatusChanged;speechWorker.Dispose();}
+		if (tray != null) {
+			tray.Dispose ();
+		}
+		Native.UnregisterHotKey (new WindowInteropHelper (window).Handle, 1);
+	};
+	Icon icon;
+	try {
+		icon = new Icon (System.IO.Path.Combine (AppDomain.CurrentDomain.BaseDirectory, "app.ico"));
+	} catch {
+		icon = SystemIcons.Application;
+	}
+	tray = new NotifyIcon {
+		Text = "Yike",
+		Icon = icon,
+		Visible = true
+	};
+	ApplyAccountIdentity ();
+	ContextMenuStrip contextMenuStrip = new ContextMenuStrip ();
+	contextMenuStrip.Items.Add ("显示翻译", null, delegate {
+		Show ();
+	});
+	contextMenuStrip.Items.Add ("完全退出", null, delegate {
+		exiting = true;
+		window.Close ();
+	});
+	tray.ContextMenuStrip = contextMenuStrip;
+	tray.DoubleClick += delegate {
+		Show ();
+	};
+	SystemEvents.UserPreferenceChanged += SystemThemeChanged;
+	window.Closed += delegate {
+		SystemEvents.UserPreferenceChanged -= SystemThemeChanged;
+	};
+	ApplyAppearance ();
+	if(speechWorker!=null){
+		speechWorkerStatusChanged=snapshot=>{if(window.Dispatcher.HasShutdownStarted)return;window.Dispatcher.BeginInvoke((Action)delegate{if(!exiting&&!voiceInput.IsListening)Find<System.Windows.Controls.Button>("VoiceButton").ToolTip="点击开始语音输入 · "+SpeechActivityText.FormatModel(speechWorker.Status);});};
+		speechWorker.StatusChanged+=speechWorkerStatusChanged;
+		window.ContentRendered+=delegate{speechWorker.SetPreheat(prefs.PreheatVoiceModel&&SpeechWorkerPolicy.EnabledForProduction,true);};
+	}
+	window.Show ();
+	if (!previewMode) {
+		if (remoteSession != null) {
+			RefreshRemoteAccount ();
+		} else if (string.IsNullOrWhiteSpace (Store.Key)) {
+			ShowSettings (false, "account");
+			Status ("请注册或登录 Yike 账号后使用公共翻译。");
+		}
+	}
+	SchedulePreview (args);
+}
+
+
+private void Show ()
+{
+	window.Show ();
+	window.WindowState = WindowState.Normal;
+	window.Activate ();
+}
+
+
+private void Select (System.Windows.Controls.ComboBox combo, string code)
+{
+	foreach (ComboBoxItem item in (IEnumerable)combo.Items) {
+		if ((string)item.Tag == code) {
+			combo.SelectedItem = item;
+			return;
+		}
+	}
+	combo.SelectedIndex = 0;
+}
+
+
+private string Code (System.Windows.Controls.ComboBox combo)
+{
+	return (string)((ComboBoxItem)combo.SelectedItem).Tag;
+}
+
+
+private void SavePreferences ()
+{
+	if (!previewMode) {
+		Store.Write ("preferences.json", prefs);
+	}
+}
+
+}
+}

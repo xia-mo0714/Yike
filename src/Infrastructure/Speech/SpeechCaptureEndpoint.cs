@@ -1,0 +1,1 @@
+namespace WindowsTranslator {internal sealed class SpeechCaptureEndpoint {internal string DeviceName{get;private set;}internal int DeviceIndex{get;private set;}internal SpeechCaptureEndpoint(string deviceName,int deviceIndex){DeviceName=deviceName;DeviceIndex=deviceIndex;}}}

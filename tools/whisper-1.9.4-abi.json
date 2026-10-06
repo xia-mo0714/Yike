@@ -1,0 +1,450 @@
+{
+  "pointerSize": 8,
+  "boolSize": 1,
+  "structures": {
+    "ContextParams": {
+      "size": 48,
+      "fields": {
+        "use_gpu": {
+          "offset": 0,
+          "size": 1,
+          "type": "bool8"
+        },
+        "flash_attn": {
+          "offset": 1,
+          "size": 1,
+          "type": "bool8"
+        },
+        "gpu_device": {
+          "offset": 4,
+          "size": 4,
+          "type": "int32"
+        },
+        "dtw_token_timestamps": {
+          "offset": 8,
+          "size": 1,
+          "type": "bool8"
+        },
+        "dtw_aheads_preset": {
+          "offset": 12,
+          "size": 4,
+          "type": "int32"
+        },
+        "dtw_n_top": {
+          "offset": 16,
+          "size": 4,
+          "type": "int32"
+        },
+        "dtw_aheads": {
+          "offset": 24,
+          "size": 16,
+          "type": "AheadList"
+        },
+        "dtw_mem_size": {
+          "offset": 40,
+          "size": 8,
+          "type": "size_t64"
+        }
+      }
+    },
+    "FullParams": {
+      "size": 304,
+      "fields": {
+        "strategy": {
+          "offset": 0,
+          "size": 4,
+          "type": "int32"
+        },
+        "n_threads": {
+          "offset": 4,
+          "size": 4,
+          "type": "int32"
+        },
+        "n_max_text_ctx": {
+          "offset": 8,
+          "size": 4,
+          "type": "int32"
+        },
+        "offset_ms": {
+          "offset": 12,
+          "size": 4,
+          "type": "int32"
+        },
+        "duration_ms": {
+          "offset": 16,
+          "size": 4,
+          "type": "int32"
+        },
+        "translate": {
+          "offset": 20,
+          "size": 1,
+          "type": "bool8"
+        },
+        "no_context": {
+          "offset": 21,
+          "size": 1,
+          "type": "bool8"
+        },
+        "no_timestamps": {
+          "offset": 22,
+          "size": 1,
+          "type": "bool8"
+        },
+        "single_segment": {
+          "offset": 23,
+          "size": 1,
+          "type": "bool8"
+        },
+        "print_special": {
+          "offset": 24,
+          "size": 1,
+          "type": "bool8"
+        },
+        "print_progress": {
+          "offset": 25,
+          "size": 1,
+          "type": "bool8"
+        },
+        "print_realtime": {
+          "offset": 26,
+          "size": 1,
+          "type": "bool8"
+        },
+        "print_timestamps": {
+          "offset": 27,
+          "size": 1,
+          "type": "bool8"
+        },
+        "token_timestamps": {
+          "offset": 28,
+          "size": 1,
+          "type": "bool8"
+        },
+        "thold_pt": {
+          "offset": 32,
+          "size": 4,
+          "type": "float32"
+        },
+        "thold_ptsum": {
+          "offset": 36,
+          "size": 4,
+          "type": "float32"
+        },
+        "max_len": {
+          "offset": 40,
+          "size": 4,
+          "type": "int32"
+        },
+        "split_on_word": {
+          "offset": 44,
+          "size": 1,
+          "type": "bool8"
+        },
+        "max_tokens": {
+          "offset": 48,
+          "size": 4,
+          "type": "int32"
+        },
+        "debug_mode": {
+          "offset": 52,
+          "size": 1,
+          "type": "bool8"
+        },
+        "audio_ctx": {
+          "offset": 56,
+          "size": 4,
+          "type": "int32"
+        },
+        "tdrz_enable": {
+          "offset": 60,
+          "size": 1,
+          "type": "bool8"
+        },
+        "suppress_regex": {
+          "offset": 64,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "initial_prompt": {
+          "offset": 72,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "carry_initial_prompt": {
+          "offset": 80,
+          "size": 1,
+          "type": "bool8"
+        },
+        "prompt_tokens": {
+          "offset": 88,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "prompt_n_tokens": {
+          "offset": 96,
+          "size": 4,
+          "type": "int32"
+        },
+        "language": {
+          "offset": 104,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "detect_language": {
+          "offset": 112,
+          "size": 1,
+          "type": "bool8"
+        },
+        "suppress_blank": {
+          "offset": 113,
+          "size": 1,
+          "type": "bool8"
+        },
+        "suppress_nst": {
+          "offset": 114,
+          "size": 1,
+          "type": "bool8"
+        },
+        "temperature": {
+          "offset": 116,
+          "size": 4,
+          "type": "float32"
+        },
+        "max_initial_ts": {
+          "offset": 120,
+          "size": 4,
+          "type": "float32"
+        },
+        "length_penalty": {
+          "offset": 124,
+          "size": 4,
+          "type": "float32"
+        },
+        "temperature_inc": {
+          "offset": 128,
+          "size": 4,
+          "type": "float32"
+        },
+        "entropy_thold": {
+          "offset": 132,
+          "size": 4,
+          "type": "float32"
+        },
+        "logprob_thold": {
+          "offset": 136,
+          "size": 4,
+          "type": "float32"
+        },
+        "no_speech_thold": {
+          "offset": 140,
+          "size": 4,
+          "type": "float32"
+        },
+        "greedy": {
+          "offset": 144,
+          "size": 4,
+          "type": "GreedyParams"
+        },
+        "beam_search": {
+          "offset": 148,
+          "size": 8,
+          "type": "BeamParams"
+        },
+        "new_segment_callback": {
+          "offset": 160,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "new_segment_callback_user_data": {
+          "offset": 168,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "progress_callback": {
+          "offset": 176,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "progress_callback_user_data": {
+          "offset": 184,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "encoder_begin_callback": {
+          "offset": 192,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "encoder_begin_callback_user_data": {
+          "offset": 200,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "abort_callback": {
+          "offset": 208,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "abort_callback_user_data": {
+          "offset": 216,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "logits_filter_callback": {
+          "offset": 224,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "logits_filter_callback_user_data": {
+          "offset": 232,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "grammar_rules": {
+          "offset": 240,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "n_grammar_rules": {
+          "offset": 248,
+          "size": 8,
+          "type": "size_t64"
+        },
+        "i_start_rule": {
+          "offset": 256,
+          "size": 8,
+          "type": "size_t64"
+        },
+        "grammar_penalty": {
+          "offset": 264,
+          "size": 4,
+          "type": "float32"
+        },
+        "vad": {
+          "offset": 268,
+          "size": 1,
+          "type": "bool8"
+        },
+        "vad_model_path": {
+          "offset": 272,
+          "size": 8,
+          "type": "pointer64"
+        },
+        "vad_params": {
+          "offset": 280,
+          "size": 24,
+          "type": "VadParams"
+        }
+      }
+    },
+    "VadParams": {
+      "size": 24,
+      "fields": {
+        "threshold": {
+          "offset": 0,
+          "size": 4,
+          "type": "float32"
+        },
+        "min_speech_duration_ms": {
+          "offset": 4,
+          "size": 4,
+          "type": "int32"
+        },
+        "min_silence_duration_ms": {
+          "offset": 8,
+          "size": 4,
+          "type": "int32"
+        },
+        "max_speech_duration_s": {
+          "offset": 12,
+          "size": 4,
+          "type": "float32"
+        },
+        "speech_pad_ms": {
+          "offset": 16,
+          "size": 4,
+          "type": "int32"
+        },
+        "samples_overlap": {
+          "offset": 20,
+          "size": 4,
+          "type": "float32"
+        }
+      }
+    },
+    "TokenData": {
+      "size": 56,
+      "fields": {
+        "id": {
+          "offset": 0,
+          "size": 4,
+          "type": "int32"
+        },
+        "tid": {
+          "offset": 4,
+          "size": 4,
+          "type": "int32"
+        },
+        "p": {
+          "offset": 8,
+          "size": 4,
+          "type": "float32"
+        },
+        "plog": {
+          "offset": 12,
+          "size": 4,
+          "type": "float32"
+        },
+        "pt": {
+          "offset": 16,
+          "size": 4,
+          "type": "float32"
+        },
+        "ptsum": {
+          "offset": 20,
+          "size": 4,
+          "type": "float32"
+        },
+        "t0": {
+          "offset": 24,
+          "size": 8,
+          "type": "int64"
+        },
+        "t1": {
+          "offset": 32,
+          "size": 8,
+          "type": "int64"
+        },
+        "t_dtw": {
+          "offset": 40,
+          "size": 8,
+          "type": "int64"
+        },
+        "vlen": {
+          "offset": 48,
+          "size": 4,
+          "type": "float32"
+        }
+      }
+    }
+  },
+  "version": "1.9.4",
+  "source": "https://github.com/ggml-org/whisper.cpp/blob/v1.9.4/include/whisper.h",
+  "headerSha256": "a7d19f7feb5be52426628ff07e0602de28a30dc4312d0d0603e1e536753f76dd",
+  "layoutCompiler": "Zig 0.15.2 / Clang, x86_64 Windows GNU executable; identical x86_64 MSVC AST layouts (MSVC SDK is not installed)",
+  "dependencies": {
+    "ggml-base.dll": "a5241b52206f61c9dfd6f0f53a8ef19076f9528ead2db1e039a66d7e03817bfc",
+    "ggml.dll": "c6e88687d6aa0238f2e834a87958f38d2dc96075a6a7bf6fb8b9cd728a0faed2",
+    "whisper.dll": "b7bb4ba92bd36b8afe0c00059ca6a0f69c6767193bfb5f0761e9ed27b1087803",
+    "SDL2.dll": "de23db1694a3c7a4a735e7ecd3d214b2023cc2267922c6c35d30c7fc7370d677",
+    "ggml-cpu-alderlake.dll": "5a5b11dcd38e321b13f85c95414940db9eab1132be3da6342f03dfb1d8e51bd5",
+    "ggml-cpu-cannonlake.dll": "2c858781450b52eda95c381232cc65c9e19cbf621cc7b254d8c44fdbab77791e",
+    "ggml-cpu-cascadelake.dll": "ddf49bb749b34800afcb3d6224544966a05c5d00f1d0b6565bee9f3b010dd53c",
+    "ggml-cpu-haswell.dll": "6b772e094b8976e22b4c043be86a1a8deda4b50511dc803a693b652c51b24944",
+    "ggml-cpu-icelake.dll": "bbd87ea5920edc401054848071ad2ef8c96bbf8007c4e4cd0ea82ba9b9e3bd10",
+    "ggml-cpu-sandybridge.dll": "de2ad5f84c7dfa557d515b3678d6452ce0216590268b2ca79cc537fe87cf239d",
+    "ggml-cpu-skylakex.dll": "9fa3f9d984ca42d568181dd345072299db2978b328800343218c2c7f000b7152",
+    "ggml-cpu-sse42.dll": "740fc769ef433985dfdb24a609a42d5acf188abda52287a4d89b89b567507c19",
+    "ggml-cpu-x64.dll": "43ccf32b9b70aa4c47d0a12ac2ed3c241e0045571acdad565ecd9d1f99ffc08b"
+  }
+}

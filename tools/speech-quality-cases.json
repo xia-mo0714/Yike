@@ -1,0 +1,10 @@
+{"cases":[
+{"id":"zh-normal","text":"今天下午我们一起去公园散步。","culture":"zh-CN","variant":"normal","languages":["auto","zh"]},
+{"id":"en-normal","text":"Please open the window and turn off the light.","culture":"en-US","variant":"normal","languages":["auto","en"]},
+{"id":"mixed-normal","text":"今天我们测试 voice input 效果很好。","culture":"mixed","variant":"normal","languages":["auto"]},
+{"id":"zh-quiet","text":"今天下午我们一起去公园散步。","culture":"zh-CN","variant":"low-volume","languages":["auto","zh"]},
+{"id":"en-quiet","text":"Please open the window and turn off the light.","culture":"en-US","variant":"low-volume","languages":["auto","en"]},
+{"id":"zh-fan","text":"今天下午我们一起去公园散步。","culture":"zh-CN","variant":"fan-noise","languages":["auto","zh"]},
+{"id":"en-keyboard","text":"Please open the window and turn off the light.","culture":"en-US","variant":"keyboard-spike","languages":["auto","en"]},
+{"id":"zh-pause","text":"今天下午我们一起去公园散步。","culture":"zh-CN","variant":"sentence-pause","languages":["auto","zh"]}
+]}
