@@ -69,6 +69,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1 -SkipRuntimes
 .\dist\Yike.exe
 
 # 回归测试、主题与缩放检查，以及 12 张界面预览
+.\tools\fetch-whisper-vad.ps1 -Destination dist\whisper-runtime\ggml-silero-v6.2.0.bin
 powershell -NoProfile -ExecutionPolicy Bypass -File .\verify.ps1 -SkipBuild
 ```
 

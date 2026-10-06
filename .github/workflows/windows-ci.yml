@@ -22,6 +22,8 @@ jobs:
           persist-credentials: false
       - name: Build core application
         run: .\build.ps1 -OutputDirectory dist\ci -SkipRuntimes
+      - name: Prepare checksum-verified VAD test dependency
+        run: .\tools\fetch-whisper-vad.ps1 -Destination dist\ci\whisper-runtime\ggml-silero-v6.2.0.bin
       - name: Run offline regression tests
         run: .\verify.ps1 -OutputDirectory dist\ci -SkipBuild -SelfTestOnly
       - name: Upload core build and test report
