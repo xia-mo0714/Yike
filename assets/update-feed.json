@@ -1,5 +1,5 @@
 {
-  "Version": "2.3.1.0",
-  "DownloadUrl": "https://github.com/xia-mo0714/Yike/releases/tag/v2.3.1",
-  "Notes": "Yike Windows 2.3.1：迁移到独立 Windows 发布仓库，修复标准安装包识别和 HTTPS 更新清单校验信息，保留既有语音与翻译优化。此文件是安装版本元数据，不是在线更新源。"
+  "Version": "2.3.2.0",
+  "DownloadUrl": "https://github.com/xia-mo0714/Yike/releases/tag/v2.3.2",
+  "Notes": "Yike Windows 2.3.2：独立 Windows 发布通道，新增 GitHub API 限流时的官方发布清单备用检查。此文件是安装版本元数据，不是在线更新源。"
 }

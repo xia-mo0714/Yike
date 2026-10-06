@@ -28,6 +28,7 @@ internal static class UpdateTests {
 		Check(!UpdateService.Parse(manifestJson.Replace("\"Size\":3", "\"Size\":0"), old).Success, "zero manifest installer size accepted");
 		Check(!UpdateService.Parse(manifestJson.Replace("https://downloads.example.com", "http://downloads.example.com"), old).Success, "insecure installer accepted");
 		Check(!UpdateService.Parse(manifestJson, new Version(2,3,1,0)).UpdateAvailable, "same version incorrectly offered as update");
+		Check(!UpdateService.Parse(manifestJson.Replace("https://downloads.example.com/Yike-Setup.exe", "ms-windows-store://pdp/?ProductId=123"), old).CanInstall, "store link incorrectly offered as HTTP installer");
 		string json = Store.Json.Serialize(new[] { Release("v2.0-build71"), Release("windows-v1.2.1"), Release("windows-v1.2.3"),
 			Release("windows-v9.0.0", true), Release("windows-v8.0.0", false, true), Release("windows-v7.0.0", false, false, "starter") });
 		UpdateCheckResult result = UpdateService.ParseGitHubReleases(json, old);
@@ -52,6 +53,16 @@ internal static class UpdateTests {
 			Check(newestOnline.LatestVersion == new Version(2,3,0,0) && newestOnline.ReleaseUrl.EndsWith("/tag/v2.3") && requests == 1, "GitHub-only update check did not select v2.3");
 			UpdateService offline = new UpdateService(root, old, delegate { throw new HttpRequestException(); });
 			Check(!offline.CheckAsync(CancellationToken.None).GetAwaiter().GetResult().Success, "offline check falsely reports latest");
+			UpdateService limited = new UpdateService(root, old, delegate(Uri uri, CancellationToken token) {
+				if (uri.AbsoluteUri == UpdateService.ReleasesUrl + "/latest/download/update-windows.json") return Task.FromResult(manifestJson.Replace("https://downloads.example.com/Yike-Setup.exe", UpdateService.ReleasesUrl + "/download/v2.3.1/Yike-Setup.exe"));
+				throw new HttpRequestException("GitHub anonymous API limit");
+			});
+			Check(limited.CheckAsync(CancellationToken.None).GetAwaiter().GetResult().CanInstall, "API limit prevents verified release manifest fallback");
+			UpdateService foreignFallback = new UpdateService(root, old, delegate(Uri uri, CancellationToken token) {
+				if (uri.AbsoluteUri == UpdateService.ReleasesUrl + "/latest/download/update-windows.json") return Task.FromResult(manifestJson);
+				throw new HttpRequestException();
+			});
+			Check(!foreignFallback.CheckAsync(CancellationToken.None).GetAwaiter().GetResult().Success, "foreign installer accepted from default release fallback");
 			using (CancellationTokenSource cancel = new CancellationTokenSource()) {
 				cancel.Cancel(); Check(!online.CheckAsync(cancel.Token).GetAwaiter().GetResult().Success, "cancelled check succeeded");
 			}

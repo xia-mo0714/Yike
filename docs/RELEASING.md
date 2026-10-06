@@ -2,14 +2,14 @@
 
 Windows 独立仓库：`xia-mo0714/Yike`。正式版本使用 `v2.3.1` 等递增标签，安装包统一命名 `Yike-Setup.exe`。不要只替换同版本附件来推送更新。
 
-客户端从 Releases 列表选择版本号最高的非草稿、非预发布 Windows 安装包，验证 GitHub 返回的安装包大小和 SHA-256 后才启动安装。断网或解析失败会明确提示无法确认最新版。
+客户端从 Releases 列表选择版本号最高的非草稿、非预发布 Windows 安装包，验证 GitHub 返回的安装包大小和 SHA-256 后才启动安装。API 请求失败（例如匿名请求限流）时，读取同仓库 Latest Release 的 `update-windows.json`，并要求安装包与发布页仍属于该仓库、具有完整大小与 SHA-256。两个路径都失败时明确提示无法确认最新版。
 
 ## 发布步骤
 
 1. 同步更新 `src/Application/AssemblyInfo.cs`、`installer/Setup.cs` 和 `assets/update-feed.json` 的版本；模型下载地址必须指向实际存在的模型附件。
 2. 在 Windows 准备运行库，执行 `build.ps1` 和 `verify.ps1`；原生语音候选验收未通过时保持生产开关关闭。
 3. 用 `installer/build-installer.ps1` 生成轻量安装包，运行 `Yike-Setup.exe --verify --silent` 验证内嵌文件。
-4. 创建草稿 Release，上传 `Yike-Setup.exe`、`SHA256SUMS.txt`、`update-windows.json`。首次模型发布还需上传校验通过的 `ggml-small-q8_0.bin`（SHA-256：`49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f`）。
+4. 创建草稿 Release，上传 `Yike-Setup.exe`、`SHA256SUMS.txt`、`update-windows.json`。每次发布均须提供最新清单；将稳定版标记为 Latest，供 API 限流时使用。模型已固定在 `v2.3.1` 的 `ggml-small-q8_0.bin`（SHA-256：`49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f`），未更换模型时无需重复上传。
 5. 全部附件上传完成、大小与 SHA-256 核对一致后发布。不得发布空附件或只有网页链接的更新清单。
 6. 从独立测试目录运行新客户端的 `--update-service-test --download-update-test`，验证真实发现版本、下载和校验。最后由保留的旧版安装测试实际升级。
 

@@ -45,6 +45,25 @@ internal sealed class UpdateService {
 				token.ThrowIfCancellationRequested();
 				return Parse(manifest, currentVersion);
 			}
+			try { return await CheckReleasesAsync(token).ConfigureAwait(false); }
+			catch (OperationCanceledException) { if (token.IsCancellationRequested) throw; }
+			catch (Exception) { token.ThrowIfCancellationRequested(); }
+			string fallbackJson = await fetch(new Uri(ReleasesUrl + "/latest/download/update-windows.json"), token).ConfigureAwait(false);
+			token.ThrowIfCancellationRequested();
+			UpdateCheckResult fallback = Parse(fallbackJson, currentVersion);
+			if (!fallback.Success || fallback.Sha256 == null || fallback.Size <= 0 ||
+				!fallback.DownloadUrl.StartsWith(ReleasesUrl + "/download/", StringComparison.Ordinal) ||
+				!fallback.ReleaseUrl.StartsWith(ReleasesUrl + "/tag/", StringComparison.Ordinal))
+				return UpdateCheckResult.Failed(currentVersion, "备用发布清单无效，请打开发布页查看。");
+			return fallback;
+		} catch (OperationCanceledException) {
+			return UpdateCheckResult.Failed(currentVersion, token.IsCancellationRequested ? "检查更新已取消" : "连接更新服务超时，请检查网络后重试。");
+		} catch (Exception) {
+			return UpdateCheckResult.Failed(currentVersion, "无法连接 GitHub，请检查网络或代理后重试；此次未确认是否为最新版。");
+		}
+	}
+
+	private async Task<UpdateCheckResult> CheckReleasesAsync(CancellationToken token) {
 			UpdateCheckResult newest = null;
 			for (int page = 1; page <= 5; page++) {
 				string json = await fetch(new Uri(ApiUrl + "&page=" + page), token).ConfigureAwait(false);
@@ -54,12 +73,8 @@ internal sealed class UpdateService {
 				GitHubRelease[] releases = Store.Json.Deserialize<GitHubRelease[]>(json);
 				if (releases == null || releases.Length < 100) break;
 			}
-			return newest ?? UpdateCheckResult.Failed(currentVersion, "GitHub Releases 未找到可用的 Windows 稳定版。");
-		} catch (OperationCanceledException) {
-			return UpdateCheckResult.Failed(currentVersion, token.IsCancellationRequested ? "检查更新已取消" : "连接更新服务超时，请检查网络后重试。");
-		} catch (Exception) {
-			return UpdateCheckResult.Failed(currentVersion, "无法连接 GitHub，请检查网络或代理后重试；此次未确认是否为最新版。");
-		}
+			if (newest == null) throw new InvalidDataException("GitHub Releases 未找到可用的 Windows 稳定版。");
+			return newest;
 	}
 
 	private async Task<string> FetchAsync(Uri uri, CancellationToken token) {
@@ -147,7 +162,7 @@ internal sealed class UpdateService {
 			if (manifest.ReleaseUrl != null && (!Uri.TryCreate(manifest.ReleaseUrl, UriKind.Absolute, out page) || page.Scheme != "https"))
 				return UpdateCheckResult.Failed(currentVersion, "发布页地址无效");
 			return UpdateCheckResult.Found(NormalizeVersion(currentVersion), NormalizeVersion(version), url.AbsoluteUri,
-				manifest.Notes, manifest.ReleaseUrl, sha == null ? null : sha.ToLowerInvariant(), manifest.Size);
+				manifest.Notes, manifest.ReleaseUrl, sha == null || url.Scheme != "https" ? null : sha.ToLowerInvariant(), manifest.Size);
 		} catch (Exception) { return UpdateCheckResult.Failed(currentVersion, "更新信息无法解析，请检查更新源。"); }
 	}
 

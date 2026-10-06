@@ -15,9 +15,9 @@ using Microsoft.Win32;
 
 [assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
 [assembly: CompilationRelaxations(8)]
-[assembly: AssemblyVersion("2.3.1.0")]
-[assembly: AssemblyFileVersion("2.3.1.0")]
-[assembly: AssemblyInformationalVersion("2.3.1")]
+[assembly: AssemblyVersion("2.3.2.0")]
+[assembly: AssemblyFileVersion("2.3.2.0")]
+[assembly: AssemblyInformationalVersion("2.3.2")]
 internal static class Setup
 {
 	private const string AppName = "Yike";
@@ -196,7 +196,7 @@ internal static class Setup
 		Application.SetCompatibleTextRenderingDefault(false);
 		using (Form form = new Form())
 		{
-			form.Text = "安装 Yike 2.3.1";
+			form.Text = "安装 Yike 2.3.2";
 			form.Width = 680;
 			form.Height = 285;
 			form.StartPosition = FormStartPosition.CenterScreen;
@@ -525,7 +525,7 @@ internal static class Setup
 		{
 			using (WebClient client = new WebClient())
 			{
-				client.Headers[HttpRequestHeader.UserAgent] = "Yike-Setup/2.3.1";
+				client.Headers[HttpRequestHeader.UserAgent] = "Yike-Setup/2.3.2";
 				if (silentMode)
 				{
 					client.DownloadFile(new Uri(ModelDownloadUrl), temporary);
@@ -551,7 +551,7 @@ internal static class Setup
 		bool finished = false;
 		using (Form form = new Form())
 		{
-			form.Text = "安装 Yike 2.3.1";
+			form.Text = "安装 Yike 2.3.2";
 			form.Width = 560;
 			form.Height = 190;
 			form.StartPosition = FormStartPosition.CenterScreen;

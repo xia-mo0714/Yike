@@ -2,7 +2,7 @@
     [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PackageName,
     [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$Publisher,
     [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$PublisherDisplayName,
-    [string]$Version = '2.3.1.0',
+    [string]$Version = '2.3.2.0',
     [string]$SourceDirectory = '',
     [string]$OutputDirectory = '',
     [string]$MakeAppxPath = '',
