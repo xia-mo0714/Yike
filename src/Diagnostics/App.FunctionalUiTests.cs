@@ -148,7 +148,8 @@ public partial class App {
 				RenderTargetBitmap image = new RenderTargetBitmap((int)content.ActualWidth,(int)content.ActualHeight,96,96,PixelFormats.Pbgra32);
 				image.Render(content); ImageFiles.Save(image,Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"ui-"+page+"-"+prefs.Appearance+".png"));
 			}
-			UiCheck(typeof(App).Assembly.GetName().Version == new Version(2,3,1,0) && UiDescendants(first.Content as DependencyObject).OfType<TextBlock>().Any(t=>t.Text.Contains("当前安装版本") && t.Text.Contains("2.3.1")), "About version isn't the running 2.3.1 assembly");
+			string expectedDisplayVersion = typeof(App).Assembly.GetName().Version.ToString(3);
+			UiCheck(UiDescendants(first.Content as DependencyObject).OfType<TextBlock>().Any(t=>t.Text.Contains("当前安装版本") && t.Text.Contains(expectedDisplayVersion)), "About version isn't the running assembly version");
 			RemoteAccountSession savedSession=remoteSession; bool savedPreviewMode=previewMode;
 			try {
 				previewMode=false;
