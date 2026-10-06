@@ -19,7 +19,7 @@ $files = @(
     'docs\EXISTING_REPOSITORY.md','docs\RELEASING.md','docs\PHASE2-SPEECH.md','packaging\github\windows-ci-monorepo.yml',
     'docs\images\main-light.png','docs\images\main-dark.png'
 )
-foreach ($folder in @('src','.github','third_party\licenses','tests','speech-worker','tools')) {
+foreach ($folder in @('src','.github','third_party\licenses','tests','speech-worker','tools','installer')) {
     $folderRoot = Join-Path $projectRoot $folder
     $allItems = @(Get-Item -LiteralPath $folderRoot) + @(Get-ChildItem -LiteralPath $folderRoot -Force -Recurse:($folder -ne 'tools' -and $folder -ne 'tests'))
     foreach ($item in $allItems) {
@@ -30,6 +30,7 @@ foreach ($folder in @('src','.github','third_party\licenses','tests','speech-wor
                 '.github' { @('.yml','.yaml','.md') }
                 'tests' { @('.cs','.py') }
                 'speech-worker' { @('.cs','.manifest') }
+                'installer' { @('.cs','.ps1') }
                 'tools' { @('.ps1','.json','.c') }
                 default { @('.txt') }
             }
